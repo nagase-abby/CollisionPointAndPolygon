@@ -1,3 +1,7 @@
+// リファレンス
+// 数式の公式 http://poltergeist.web.fc2.com/hit_test.html
+// 数式の読解 https://oshiete.goo.ne.jp/qa/482563.html
+
 using System.Collections.Generic;
 using UnityEngine;
 
