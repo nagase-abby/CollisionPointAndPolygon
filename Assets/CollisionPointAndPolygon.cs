@@ -21,11 +21,7 @@ public class CollisionPointAndPolygon : MonoBehaviour
 
     private void Update()
     {
-        Vector3 mousePosition = Input.mousePosition;
-        mousePosition.z = 0;
-        // 終点
-        Vector3 mouseOrigin = Camera.main.ScreenToWorldPoint(mousePosition);
-
+        MoveTarget();
         int vertexCount = poligon.positionCount - 1;
 
         // poligonの各辺のベクトルAを取得
@@ -40,7 +36,7 @@ public class CollisionPointAndPolygon : MonoBehaviour
         var pointVectorList = new List<Vector2>();
         for (int i = 0; i < vertexCount; i++)
         {
-            var vector = mouseOrigin - poligon.GetPosition(i);
+            var vector = target.GetPosition(0) - poligon.GetPosition(i);
             pointVectorList.Add(vector);
         }
 
@@ -51,5 +47,24 @@ public class CollisionPointAndPolygon : MonoBehaviour
             var z = Vector3.Cross(poligonVectorList[i], pointVectorList[i]);
             Debug.Log($"cross{i} : {z}");
         }
+    }
+
+    private void MoveTarget()
+    {
+        Vector3 mousePosition = Input.mousePosition;
+        mousePosition.z = 0;
+        Vector3 mousePoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+        // 1cmの四角形を描画
+        target.SetPositions(
+            new Vector3[]
+            {
+                new Vector2(mousePoint.x - 1, mousePoint.y + 1),
+                new Vector2(mousePoint.x + 1, mousePoint.y + 1),
+                new Vector2(mousePoint.x + 1, mousePoint.y - 1),
+                new Vector2(mousePoint.x - 1, mousePoint.y - 1),
+                new Vector2(mousePoint.x - 1, mousePoint.y + 1),
+            }
+        );
     }
 }
