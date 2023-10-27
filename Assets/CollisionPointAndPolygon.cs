@@ -1,8 +1,7 @@
 // リファレンス
-// 数式の公式 http://poltergeist.web.fc2.com/hit_test.html
+// 数式の公式 http://poltergeist.web.fc2.com/hit_test.html / https://blog.logicky.com/2011/09/06/blog-post_06/
 // 数式の読解 https://oshiete.goo.ne.jp/qa/482563.html
 
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -22,30 +21,14 @@ public class CollisionPointAndPolygon : MonoBehaviour
     private void Update()
     {
         MoveTarget();
-        int vertexCount = poligon.positionCount - 1;
 
-        // poligonの各辺のベクトルAを取得
-        var poligonVectorList = new List<Vector3>();
-        for (int i = 0; i < vertexCount; i++)
+        if (IsHit(new Vector3[] { target.GetPosition(0), target.GetPosition(1), target.GetPosition(2), target.GetPosition(3) }))
         {
-            var vector = poligon.GetPosition(i + 1) - poligon.GetPosition(i);
-            poligonVectorList.Add(vector);
+            Debug.Log("内側にあります");
         }
-
-        // poligonの各点と対象の点のベクトルBを取得
-        var pointVectorList = new List<Vector2>();
-        for (int i = 0; i < vertexCount; i++)
+        else
         {
-            var vector = target.GetPosition(0) - poligon.GetPosition(i);
-            pointVectorList.Add(vector);
-        }
-
-        // ベクトルAとベクトルBから外積を取得してz軸(垂線)の向きがプラスかマイナスかを判定する
-        // 全部同じ向きなら多角形の内部に点がある
-        for (int i = 0; i < vertexCount; i++)
-        {
-            var z = Vector3.Cross(poligonVectorList[i], pointVectorList[i]);
-            Debug.Log($"cross{i} : {z}");
+            Debug.Log("外側にあります");
         }
     }
 
@@ -66,5 +49,32 @@ public class CollisionPointAndPolygon : MonoBehaviour
                 new Vector2(mousePoint.x - 1, mousePoint.y + 1),
             }
         );
+    }
+
+    private bool IsHit(Vector3[] points)
+    {
+        int vertexCount = poligon.positionCount - 1;
+
+        foreach (var point in points)
+        {
+            bool inside = true;
+            for (int i = 0; i < vertexCount; i++)
+            {
+                // poligonの各辺のベクトルAを取得
+                var vectorA = poligon.GetPosition(i + 1) - poligon.GetPosition(i);
+                // poligonの各点と対象の点のベクトルBを取得
+                var vectorB = point - poligon.GetPosition(i);
+
+                // ベクトルAとベクトルBから外積を取得してz軸(垂線)の向きがプラスかマイナスかを判定する
+                // マイナスであれば多角形の内側に点がある
+                if (Vector3.Cross(vectorA, vectorB).z > 0)
+                {
+                    inside = false;
+                    break;
+                }
+            }
+            if (inside) return true;
+        }
+        return false;
     }
 }
