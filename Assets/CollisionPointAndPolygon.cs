@@ -18,11 +18,35 @@ public class CollisionPointAndPolygon : MonoBehaviour
     [SerializeField]
     private LineRenderer target = null;
 
+    private Vector3[] PoligonPoints;
+
+    private Vector3[] TargetPoints;
+
+    private int MAX_VERTEX_COUNT = 5;
+
+    private void Start()
+    {
+        PoligonPoints = new Vector3[poligon.positionCount];
+        TargetPoints = new Vector3[target.positionCount];
+    }
+
     private void Update()
     {
         MoveTarget();
+        for (int i = 0; i < MAX_VERTEX_COUNT; i++)
+        {
+            if (i < poligon.positionCount)
+            {
+                PoligonPoints[i] = poligon.GetPosition(i);
+            }
 
-        if (IsHit(new Vector3[] { target.GetPosition(0), target.GetPosition(1), target.GetPosition(2), target.GetPosition(3) }))
+            if (i < target.positionCount)
+            {
+                TargetPoints[i] = target.GetPosition(i);
+            }
+        }
+
+        if (IsHit(TargetPoints, PoligonPoints) || IsHit(PoligonPoints, TargetPoints))
         {
             Debug.Log("内側にあります");
         }
@@ -51,29 +75,27 @@ public class CollisionPointAndPolygon : MonoBehaviour
         );
     }
 
-    private bool IsHit(Vector3[] points)
+    private bool IsHit(Vector3[] points, Vector3[] poligon)
     {
-        int vertexCount = poligon.positionCount - 1;
+        int vertexCount = poligon.Length - 1;
 
         foreach (var point in points)
         {
-            bool inside = true;
+            bool outside = false;
             for (int i = 0; i < vertexCount; i++)
             {
                 // poligonの各辺のベクトルAを取得
-                var vectorA = poligon.GetPosition(i + 1) - poligon.GetPosition(i);
+                var vectorA = poligon[i + 1] - poligon[i];
                 // poligonの各点と対象の点のベクトルBを取得
-                var vectorB = point - poligon.GetPosition(i);
+                var vectorB = point - poligon[i];
 
                 // ベクトルAとベクトルBから外積を取得してz軸(垂線)の向きがプラスかマイナスかを判定する
                 // マイナスであれば多角形の内側に点がある
-                if (Vector3.Cross(vectorA, vectorB).z > 0)
-                {
-                    inside = false;
-                    break;
-                }
+                outside = Vector3.Cross(vectorA, vectorB).z > 0;
+                if (outside) break;
             }
-            if (inside) return true;
+            // 一つでも内側に存在すれば当たり
+            if (!outside) return true;
         }
         return false;
     }
